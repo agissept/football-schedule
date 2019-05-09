@@ -1,4 +1,4 @@
-package id.agis.footballschedule.detail_league
+package id.agis.footballschedule.match
 
 import android.content.Context
 import android.view.LayoutInflater
@@ -15,7 +15,8 @@ import kotlinx.android.synthetic.main.match_list.view.*
 class MatchAdapter(private val matchList: List<Event>,
                    private val context: Context,
                    private val homeBadge: List<String?>,
-                   private val awayBadge: List<String?>) :
+                   private val awayBadge: List<String?>
+) :
     RecyclerView.Adapter<MatchAdapter.ViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {

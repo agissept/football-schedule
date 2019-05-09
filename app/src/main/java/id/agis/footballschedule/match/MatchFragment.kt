@@ -5,45 +5,40 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ProgressBar
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import id.agis.footballschedule.R
-import id.agis.footballschedule.model.EventResponse
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
+import id.agis.footballschedule.model.Event
+import kotlinx.android.synthetic.main.fragment_match.view.*
 import id.agis.footballschedule.api.ApiClient
 import id.agis.footballschedule.api.ApiInterface
-import id.agis.footballschedule.detail_league.MatchAdapter
-import id.agis.footballschedule.model.Event
-import id.agis.footballschedule.model.TeamResponse
-import kotlinx.android.synthetic.main.fragment_match.view.*
 
 
-lateinit var nextMatch: RecyclerView
-lateinit var lastMatch: RecyclerView
+class MatchFragment(private val idLeague: String) : Fragment(), MatchView {
 
+    private var nextMatchList: MutableList<Event> = mutableListOf()
+    private var lastMatchList: MutableList<Event> = mutableListOf()
+    private var homeBadgeNextEventList: MutableList<String?> = mutableListOf()
+    private var awayBadgeNextEventList: MutableList<String?> = mutableListOf()
+    private var homeBadgeLastEventList: MutableList<String?> = mutableListOf()
+    private var awayBadgeLastEventList: MutableList<String?> = mutableListOf()
 
-class MatchFragment(private val idLeague: String) : Fragment() {
-    var nextMatchList = mutableListOf<Event>()
-    var lastMatchList = mutableListOf<Event>()
-    var homeBadgeNextEventList: Array<String?> = arrayOfNulls(0)
-    var awayBadgeNextEventList: Array<String?> = arrayOfNulls(0)
-    var homeBadgeLastEventList: Array<String?> = arrayOfNulls(0)
-    var awayBadgeLastEventList: Array<String?> = arrayOfNulls(0)
-    var nextMatchStatus = false
-    var lastMatchStatus = false
-    lateinit var progressBar: ProgressBar
+    private lateinit var progressBar: ProgressBar
+    private lateinit var nextMatch: RecyclerView
+    private lateinit var lastMatch: RecyclerView
+    private lateinit var nextMatchAdapter: MatchAdapter
+    private lateinit var lastMatchAdapter: MatchAdapter
+    private lateinit var swipeRefresh: SwipeRefreshLayout
 
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_match, container, false)
 
-       progressBar = view.progress_circular
-        progressBar.visibility = View.VISIBLE
-
-
+        progressBar = view.progress_circular
+        swipeRefresh = view.swipe_refresh
         nextMatch = view.next_match
         lastMatch = view.last_match
 
@@ -52,160 +47,61 @@ class MatchFragment(private val idLeague: String) : Fragment() {
         nextMatch.isNestedScrollingEnabled = false
         lastMatch.isNestedScrollingEnabled = false
 
-        getData()
+        nextMatchAdapter = MatchAdapter(nextMatchList, context!!, homeBadgeNextEventList, awayBadgeNextEventList)
+        lastMatchAdapter = MatchAdapter(lastMatchList, context!!, homeBadgeLastEventList, awayBadgeLastEventList)
 
-        view.swipe_refresh.setOnRefreshListener {
-            getData()
-            view.swipe_refresh.isRefreshing = false
+        nextMatch.adapter = nextMatchAdapter
+        lastMatch.adapter = lastMatchAdapter
+
+        val apiInterface = ApiClient.retrofit.create(ApiInterface::class.java)
+        val presenter = MatchPresenter(apiInterface, this)
+        presenter.getNextMatch(idLeague)
+        presenter.getLastMatch(idLeague)
+
+        swipeRefresh.setOnRefreshListener {
+            presenter.getNextMatch(idLeague)
+            presenter.getLastMatch(idLeague)
+            progressBar.visibility = View.INVISIBLE
         }
-
 
         return view
     }
 
-    private fun getData() {
-        getLastMatch()
-        getNextMatch()
 
-
+    override fun showLoading() {
+        progressBar.visibility = View.VISIBLE
     }
 
-    private fun getNextMatch() {
-        val apiInterface = ApiClient.retrofit.create(ApiInterface::class.java)
-        val getNextMatch: Call<EventResponse> = apiInterface.getNextMatch(idLeague)
-        getNextMatch.enqueue(object : Callback<EventResponse> {
-            override fun onFailure(call: Call<EventResponse>, t: Throwable) {
-                println("Throwable : $t")
-            }
-
-            override fun onResponse(call: Call<EventResponse>, response: Response<EventResponse>) {
-                val a = response.body()!!.events
-                if (a != null) {
-                    nextMatchList.addAll(a)
-                    homeBadgeNextEventList = arrayOfNulls<String?>(nextMatchList.size)
-                    awayBadgeNextEventList = arrayOfNulls<String?>(nextMatchList.size)
-                    println("size n = " + nextMatchList.size)
-
-                    nextMatchList.forEachIndexed { index, e ->
-                        getUrl(e.idHomeTeam, index, "home", "next")
-                        getUrl(e.idAwayTeam, index, "away", "next")
-                    }
-
-                } else {
-                    println("data is null")
-                    nextMatchStatus = true
-                    finishProgressBar()
-
-                }
-            }
-
-        })
+    override fun hideLoading() {
+        progressBar.visibility = View.INVISIBLE
     }
 
-
-    private fun getLastMatch() {
-        val apiInterface = ApiClient.retrofit.create(ApiInterface::class.java)
-        val getLastMatch: Call<EventResponse> = apiInterface.getLastMatch(idLeague)
-        getLastMatch.enqueue(object : Callback<EventResponse> {
-            override fun onFailure(call: Call<EventResponse>, t: Throwable) {
-                TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-            }
-
-            override fun onResponse(call: Call<EventResponse>, response: Response<EventResponse>) {
-                val a = response.body()!!.events
-                if (a != null) {
-                    println("data is not null")
-                    lastMatchList.addAll(a)
-                    homeBadgeLastEventList = arrayOfNulls<String?>(lastMatchList.size)
-                    awayBadgeLastEventList = arrayOfNulls<String?>(lastMatchList.size)
-                    lastMatchList.forEachIndexed { index, e ->
-                        getUrl(e.idHomeTeam, index, "home", "last")
-                        getUrl(e.idAwayTeam, index, "away", "last")
-                    }
-                    println("size l = " + lastMatchList.size)
-                } else {
-                    lastMatchStatus = true
-                    finishProgressBar()
-                    println("data is null")
-                }
-            }
-
-        })
+    override fun showNextMatch(match: List<Event>, homeBadge: List<String?>, awayBadge: List<String?>) {
+        swipeRefresh.isRefreshing = false
+        nextMatchList.clear()
+        homeBadgeNextEventList.clear()
+        awayBadgeNextEventList.clear()
+        nextMatchList.addAll(match)
+        homeBadgeNextEventList.addAll(homeBadge)
+        awayBadgeNextEventList.addAll(awayBadge)
+        nextMatchAdapter.notifyDataSetChanged()
     }
 
-    private fun getUrl(idTeam: String, index: Int, status: String, time: String) {
-        val apiInterface = ApiClient.retrofit.create(ApiInterface::class.java)
-        val getDetailTeam: Call<TeamResponse> = apiInterface.getDetailTeam(idTeam)
-
-        getDetailTeam.enqueue(object : Callback<TeamResponse> {
-            override fun onFailure(call: Call<TeamResponse>, t: Throwable) {
-            }
-
-            override fun onResponse(call: Call<TeamResponse>, response: Response<TeamResponse>) {
-                val a = response.body()!!.teams
-                if (status == "home") {
-                    if (time == "next") {
-                        if (a[0].strTeamBadge == null) {
-                            homeBadgeNextEventList[index] = "null"
-                        } else {
-                            homeBadgeNextEventList[index] = a[0].strTeamBadge!!
-                        }
-                    }
-                    if (time == "last") {
-                        if (a[0].strTeamBadge == null) {
-                            homeBadgeLastEventList[index] = "null"
-                        } else {
-                            homeBadgeLastEventList[index] = a[0].strTeamBadge!!
-                        }
-                    }
-                }
-                if (status == "away") {
-                    if (time == "next") {
-                        if (a[0].strTeamBadge == null) {
-                            awayBadgeNextEventList[index] = "null"
-                        } else {
-                            awayBadgeNextEventList[index] = a[0].strTeamBadge!!
-                        }
-                    }
-                    if (time == "last") {
-                        if (a[0].strTeamBadge == null) {
-                            awayBadgeLastEventList[index] = "null"
-                        } else {
-                            awayBadgeLastEventList[index] = a[0].strTeamBadge!!
-                        }
-                    }
-                }
-                println("size = ${nextMatchList.size}  ${homeBadgeNextEventList.size} ${awayBadgeNextEventList.size}")
-
-                if (homeBadgeNextEventList.size == nextMatchList.size && awayBadgeNextEventList.size == nextMatchList.size) {
-                    nextMatch.adapter = MatchAdapter(
-                        nextMatchList,
-                        this@MatchFragment.context!!,
-                        homeBadgeNextEventList.toList(),
-                        awayBadgeNextEventList.toList()
-                    )
-                    lastMatchStatus = true
-                    finishProgressBar()
-                }
-                if (homeBadgeLastEventList.size == lastMatchList.size && awayBadgeLastEventList.size == lastMatchList.size) {
-                    lastMatch.adapter = MatchAdapter(
-                        lastMatchList,
-                        this@MatchFragment.context!!,
-                        homeBadgeLastEventList.toList(),
-                        awayBadgeLastEventList.toList()
-                    )
-                    nextMatchStatus = true
-                    finishProgressBar()
-                }
-            }
-        })
-    }
-
-    fun finishProgressBar(){
-        if(nextMatchStatus && lastMatchStatus){
-            progressBar.visibility = View.INVISIBLE
+    override fun showLastMatch(match: List<Event>, homeBadge: List<String?>, awayBadge: List<String?>) {
+        swipeRefresh.isRefreshing = false
+        lastMatchList.clear()
+        homeBadgeLastEventList.clear()
+        awayBadgeLastEventList.clear()
+        lastMatchList.addAll(match)
+        homeBadgeLastEventList.addAll(homeBadge)
+        awayBadgeLastEventList.addAll(awayBadge)
+        homeBadgeLastEventList.forEachIndexed { i, s ->
+            println("$i homebadge = $s")
         }
+        lastMatchAdapter.notifyDataSetChanged()
     }
 
-
+    override fun onFailure(t: String) {
+        Toast.makeText(context, "error $t", Toast.LENGTH_SHORT).show()
+    }
 }
