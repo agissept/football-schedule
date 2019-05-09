@@ -1,14 +1,17 @@
 package id.agis.footballschedule.league
 
 import android.content.Context
+import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.cardview.widget.CardView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import id.agis.footballschedule.R
+import id.agis.footballschedule.detail_league.DetailLeagueActivity
 import id.agis.footballschedule.model.League
 import kotlinx.android.synthetic.main.league_list.view.*
 
@@ -29,10 +32,19 @@ class LeagueAdapter(
         val l = leagueList[position]
         holder.leagueName.text = l.strLeague
         Glide.with(context).load(l.strBadge).placeholder(R.drawable.ic_trophy).into(holder.leagueBadge)
+
+        holder.cardView.setOnClickListener {
+            val i = Intent(it.context, DetailLeagueActivity::class.java)
+            i.putExtra("idLeague", l.idLeague)
+            it.context.startActivity(i)
+        }
     }
 
     inner class ViewHolder(itemView: View): RecyclerView.ViewHolder(itemView) {
         val leagueName: TextView = itemView.league_name
         val leagueBadge: ImageView = itemView.league_badge
+        val cardView: CardView = itemView.card_view
     }
+
+
 }
