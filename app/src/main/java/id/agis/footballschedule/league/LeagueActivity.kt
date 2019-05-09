@@ -2,43 +2,70 @@ package id.agis.footballschedule.league
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.view.View
+import android.widget.ProgressBar
+import android.widget.Toast
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import id.agis.footballschedule.R
 import id.agis.footballschedule.api.ApiClient
 import id.agis.footballschedule.api.ApiInterface
-import id.agis.footballschedule.model.LeagueResponse
+import id.agis.footballschedule.model.League
 import kotlinx.android.synthetic.main.league_activity.*
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
 
-class LeagueActivity : AppCompatActivity() {
-    lateinit var recyclerView: RecyclerView
+class LeagueActivity : AppCompatActivity(), LeagueView {
+
+    private var leagueList: MutableList<League> = mutableListOf()
+    private lateinit var recyclerView: RecyclerView
+    private lateinit var adapter: LeagueAdapter
+    private lateinit var progressBar: ProgressBar
+    private lateinit var swipeRefresh: SwipeRefreshLayout
+    private lateinit var presenter: LeaguePresenter
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.league_activity)
 
         recyclerView = recycler_view
+        swipeRefresh = swipe_refresh
+        progressBar = progress_circular
+
+        adapter = LeagueAdapter(leagueList, this)
+
         recyclerView.layoutManager = GridLayoutManager(this, 2)
-        val apiClient = ApiClient.retrofit.create(ApiInterface::class.java)
-        val call: Call<LeagueResponse> = apiClient.getLeague()
+        recyclerView.adapter = adapter
 
-        call.enqueue(object: Callback<LeagueResponse>{
+        val apiInterface = ApiClient.retrofit.create(ApiInterface::class.java)
 
+        presenter = LeaguePresenter(this, apiInterface)
+        presenter.getLeague()
 
-            override fun onResponse(call: Call<LeagueResponse>, response: Response<LeagueResponse>) {
-                recyclerView.adapter = LeagueAdapter(response.body()?.countrys!!, applicationContext)
-            }
-
-            override fun onFailure(call: Call<LeagueResponse>, t: Throwable) {
-
-            }
-
-        })
+        swipeRefresh.setOnRefreshListener {
+            presenter.getLeague()
+            hideLoading()
+        }
 
 
+    }
 
+    override fun showLeague(data: List<League>) {
+        swipeRefresh.isRefreshing = false
+        leagueList.clear()
+        leagueList.addAll(data)
+        adapter.notifyDataSetChanged()
+    }
+
+    override fun showLoading() {
+        progressBar.visibility = View.VISIBLE
+    }
+
+    override fun hideLoading() {
+        progressBar.visibility = View.INVISIBLE
+    }
+
+    override fun onFailure(t: String) {
+        Toast.makeText(applicationContext, "error : $t", Toast.LENGTH_SHORT).show()
     }
 }

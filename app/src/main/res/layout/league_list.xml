@@ -21,7 +21,9 @@
                 android:layout_centerHorizontal="true"
                 android:layout_alignParentBottom="true"
                 android:id="@+id/league_name"
-                android:text="Lorem ipsum"/>
+                android:gravity="center_horizontal"
+                android:text="Lorem ipsum"
+                android:maxLines="2"/>
 
     </RelativeLayout>
 
