@@ -1,9 +1,6 @@
 package id.agis.footballschedule.api
 
-import id.agis.footballschedule.model.DetailLeagueResponse
-import id.agis.footballschedule.model.EventResponse
-import id.agis.footballschedule.model.LeagueResponse
-import id.agis.footballschedule.model.TeamResponse
+import id.agis.footballschedule.model.*
 import retrofit2.Call
 import retrofit2.http.GET
 import retrofit2.http.Query
@@ -23,5 +20,8 @@ interface ApiInterface {
 
     @GET("lookupteam.php")
     fun getDetailTeam(@Query ("id") idTeam: String): Call<TeamResponse>
+
+    @GET("lookuptable.php")
+    fun getStanding(@Query ("l") idLeague: String): Call<StandingsResponse>
 
 }

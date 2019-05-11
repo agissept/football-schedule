@@ -8,6 +8,6 @@ import androidx.fragment.app.Fragment
 
 class TeamFragment : Fragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        return inflater.inflate(R.layout.fragment_standing, container, false)
+        return inflater.inflate(R.layout.fragment_standings, container, false)
     }
 }
