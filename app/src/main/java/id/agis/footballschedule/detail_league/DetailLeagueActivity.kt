@@ -9,13 +9,12 @@ import androidx.core.content.ContextCompat
 import com.bumptech.glide.Glide
 import com.google.android.material.appbar.CollapsingToolbarLayout
 import id.agis.footballschedule.StandingFragment
-import id.agis.footballschedule.TeamFragment
+import id.agis.footballschedule.team.TeamFragment
 import id.agis.footballschedule.api.ApiClient
 import id.agis.footballschedule.api.ApiInterface
 import id.agis.footballschedule.match.MatchFragment
 import id.agis.footballschedule.model.DetailLeagueResponse
 import kotlinx.android.synthetic.main.activity_detail_league.*
-import kotlinx.android.synthetic.main.fragment_match.*
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -49,7 +48,7 @@ class DetailLeagueActivity : AppCompatActivity() {
         val viewPagerAdapter = TabAdapter(supportFragmentManager)
         viewPagerAdapter.addFragment(MatchFragment(intent.getStringExtra("idLeague")), "Match")
         viewPagerAdapter.addFragment(StandingFragment(), "Standing")
-        viewPagerAdapter.addFragment(TeamFragment(), "Team")
+        viewPagerAdapter.addFragment(TeamFragment(intent.getStringExtra("idLeague")), "Team")
         view_pager.adapter = viewPagerAdapter
         tab_layout.setupWithViewPager(view_pager)
 

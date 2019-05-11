@@ -24,4 +24,7 @@ interface ApiInterface {
     @GET("lookupteam.php")
     fun getDetailTeam(@Query ("id") idTeam: String): Call<TeamResponse>
 
+    @GET("lookup_all_teams.php")
+    fun getTeam(@Query ("id") idLeague: String): Call<TeamResponse>
+
 }
