@@ -8,58 +8,112 @@
 
     <androidx.core.widget.NestedScrollView
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-    >
-        <RelativeLayout
+            android:layout_height="match_parent">
+        <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent">
+                android:layout_height="match_parent"
+                android:orientation="vertical">
 
-            <ProgressBar
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/progress_circular"
-                    android:layout_marginTop="16dp"
-                    android:layout_centerHorizontal="true"/>
-
-            <LinearLayout
+            <RelativeLayout
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:orientation="vertical">
-
+                    android:layout_weight="1"
+                    android:layout_height="0dp">
 
                 <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Next Match"
                         android:layout_marginTop="16dp"
-                        android:layout_marginLeft="16dp"/>
+                        android:layout_marginLeft="16dp"
+                        android:id="@+id/title_next"/>
+
 
                 <androidx.recyclerview.widget.RecyclerView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:id="@+id/next_match">
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:id="@+id/next_match"
+                        android:layout_below="@+id/title_next"
+                        android:visibility="invisible">
 
                 </androidx.recyclerview.widget.RecyclerView>
+
+                <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@id/title_next"
+                        android:id="@+id/no_data_next">
+
+                    <ImageView
+                            android:layout_width="wrap_content"
+                            android:layout_height="180dp"
+                            android:layout_centerHorizontal="true"
+                            android:src="@drawable/ic_trophy"/>
+                    <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:gravity="center"
+                            android:text="No Data For Next Match"
+                            android:layout_centerInParent="true"
+                            android:textSize="16sp"/>
+                </RelativeLayout>
+
+                <ProgressBar
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/progress_circular"
+                        android:layout_centerHorizontal="true"/>
+
+            </RelativeLayout>
+
+            <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1">
 
                 <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Last Match"
                         android:layout_marginTop="16dp"
-                        android:layout_marginLeft="16dp"/>
+                        android:layout_marginLeft="16dp"
+                        android:id="@+id/title_last"/>
+
+                <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@id/title_last"
+                        android:id="@+id/no_data_last">
+
+                    <ImageView
+                            android:layout_width="wrap_content"
+                            android:layout_height="180dp"
+                            android:layout_centerHorizontal="true"
+                            android:src="@drawable/ic_trophy"/>
+                    <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="No Data For Next Match"
+                            android:layout_centerInParent="true"
+                            android:textSize="16sp"/>
+                </RelativeLayout>
 
                 <androidx.recyclerview.widget.RecyclerView
-                        android:layout_width="wrap_content"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:id="@+id/last_match">
+                        android:id="@+id/last_match"
+                        android:layout_below="@+id/title_last"
+                        android:visibility="invisible">
 
                 </androidx.recyclerview.widget.RecyclerView>
-            </LinearLayout>
-        </RelativeLayout>
 
+
+            </RelativeLayout>
+
+
+
+        </LinearLayout>
 
     </androidx.core.widget.NestedScrollView>
-
 
 </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 

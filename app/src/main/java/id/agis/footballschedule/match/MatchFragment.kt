@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ProgressBar
+import android.widget.RelativeLayout
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -15,6 +16,8 @@ import id.agis.footballschedule.model.Event
 import kotlinx.android.synthetic.main.fragment_match.view.*
 import id.agis.footballschedule.api.ApiClient
 import id.agis.footballschedule.api.ApiInterface
+import id.agis.footballschedule.util.invisible
+import id.agis.footballschedule.util.visible
 
 
 class MatchFragment(private val idLeague: String) : Fragment(), MatchView {
@@ -32,6 +35,8 @@ class MatchFragment(private val idLeague: String) : Fragment(), MatchView {
     private lateinit var nextMatchAdapter: MatchAdapter
     private lateinit var lastMatchAdapter: MatchAdapter
     private lateinit var swipeRefresh: SwipeRefreshLayout
+    private lateinit var noDataNextMatch: RelativeLayout
+    private lateinit var noDataLastMatch: RelativeLayout
 
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -41,6 +46,8 @@ class MatchFragment(private val idLeague: String) : Fragment(), MatchView {
         swipeRefresh = view.swipe_refresh
         nextMatch = view.next_match
         lastMatch = view.last_match
+        noDataNextMatch = view.no_data_next
+        noDataLastMatch = view.no_data_last
 
         nextMatch.layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
         lastMatch.layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
@@ -61,7 +68,7 @@ class MatchFragment(private val idLeague: String) : Fragment(), MatchView {
         swipeRefresh.setOnRefreshListener {
             presenter.getNextMatch(idLeague)
             presenter.getLastMatch(idLeague)
-            progressBar.visibility = View.INVISIBLE
+            progressBar.invisible()
         }
 
         return view
@@ -69,11 +76,11 @@ class MatchFragment(private val idLeague: String) : Fragment(), MatchView {
 
 
     override fun showLoading() {
-        progressBar.visibility = View.VISIBLE
+        progressBar.visible()
     }
 
     override fun hideLoading() {
-        progressBar.visibility = View.INVISIBLE
+        progressBar.invisible()
     }
 
     override fun showNextMatch(match: List<Event>, homeBadge: List<String?>, awayBadge: List<String?>) {
@@ -85,6 +92,8 @@ class MatchFragment(private val idLeague: String) : Fragment(), MatchView {
         homeBadgeNextEventList.addAll(homeBadge)
         awayBadgeNextEventList.addAll(awayBadge)
         nextMatchAdapter.notifyDataSetChanged()
+        nextMatch.visible()
+        noDataNextMatch.invisible()
     }
 
     override fun showLastMatch(match: List<Event>, homeBadge: List<String?>, awayBadge: List<String?>) {
@@ -95,10 +104,9 @@ class MatchFragment(private val idLeague: String) : Fragment(), MatchView {
         lastMatchList.addAll(match)
         homeBadgeLastEventList.addAll(homeBadge)
         awayBadgeLastEventList.addAll(awayBadge)
-        homeBadgeLastEventList.forEachIndexed { i, s ->
-            println("$i homebadge = $s")
-        }
         lastMatchAdapter.notifyDataSetChanged()
+        lastMatch.visible()
+        noDataLastMatch.invisible()
     }
 
     override fun onFailure(t: String) {
