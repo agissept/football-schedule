@@ -37,9 +37,11 @@ class MatchPresenter(private val apiInterface: ApiInterface, val view: MatchView
                     awayBadgeNextEventList = arrayOfNulls<String?>(nextMatchList.size)
                     println("size n = " + a.size)
 
-                    nextMatchList.forEachIndexed { index, e ->
-                        getUrlNextMatch(e.idHomeTeam, index, "home")
-                        getUrlNextMatch(e.idAwayTeam, index, "away")
+                    homeBadgeNextEventList.forEachIndexed { index, _ ->
+                        getUrlNextMatch(nextMatchList[index].idHomeTeam, index, "home")
+                    }
+                    awayBadgeNextEventList.forEachIndexed{index, _ ->
+                        getUrlNextMatch(nextMatchList[index].idAwayTeam, index, "away")
                     }
 
                 } else {
@@ -67,9 +69,11 @@ class MatchPresenter(private val apiInterface: ApiInterface, val view: MatchView
                     lastMatchList.addAll(a)
                     homeBadgeLastEventList = arrayOfNulls<String?>(lastMatchList.size)
                     awayBadgeLastEventList = arrayOfNulls<String?>(lastMatchList.size)
-                    lastMatchList.forEachIndexed { index, e ->
-                        getUrlLastMatch(e.idHomeTeam, index, "home")
-                        getUrlLastMatch(e.idAwayTeam, index, "away")
+                    homeBadgeLastEventList.forEachIndexed { index, _ ->
+                        getUrlLastMatch(lastMatchList[index].idHomeTeam, index, "home")
+                    }
+                    awayBadgeLastEventList.forEachIndexed{index, _ ->
+                        getUrlLastMatch(lastMatchList[index].idAwayTeam, index, "away")
                     }
                 } else {
                     println("data is null")
@@ -91,7 +95,7 @@ class MatchPresenter(private val apiInterface: ApiInterface, val view: MatchView
                 val a = response.body()!!.teams
                 if (status == "home") {
                     if (a[0].strTeamBadge == null) {
-                        homeBadgeNextEventList[index] = "aaa"
+                        homeBadgeNextEventList[index] = "null"
                     } else {
                         homeBadgeNextEventList[index] = a[0].strTeamBadge!!
                     }
@@ -99,18 +103,15 @@ class MatchPresenter(private val apiInterface: ApiInterface, val view: MatchView
                 }
                 if (status == "away") {
                     if (a[0].strTeamBadge == null) {
-                        awayBadgeNextEventList[index] = "aaa"
+                        awayBadgeNextEventList[index] = "null"
                     } else {
                         awayBadgeNextEventList[index] = a[0].strTeamBadge!!
                     }
 
                 }
-                println("size = ${nextMatchList.size}  ${homeBadgeNextEventList.size} ${awayBadgeNextEventList.size}")
-
-                if (homeBadgeNextEventList.size == nextMatchList.size && awayBadgeNextEventList.size == nextMatchList.size) {
+                if (!homeBadgeNextEventList.contains(null) && !awayBadgeNextEventList.contains(null)) {
                     view.showNextMatch(nextMatchList, homeBadgeNextEventList.toList(), awayBadgeNextEventList.toList())
                     view.hideLoading()
-
                 }
             }
         })
@@ -128,21 +129,20 @@ class MatchPresenter(private val apiInterface: ApiInterface, val view: MatchView
                 val a = response.body()!!.teams
                 if (status == "home") {
                     if (a[0].strTeamBadge == null) {
-                        homeBadgeLastEventList[index] = "aaa"
+                        homeBadgeLastEventList[index] = "null"
                     } else {
                         homeBadgeLastEventList[index] = a[0].strTeamBadge!!
                     }
                 }
                 if (status == "away") {
                     if (a[0].strTeamBadge == null) {
-                        awayBadgeLastEventList[index] = "aaa"
+                        awayBadgeLastEventList[index] = "null"
                     } else {
                         awayBadgeLastEventList[index] = a[0].strTeamBadge!!
                     }
                 }
-                println("size = ${lastMatchList.size}  ${homeBadgeNextEventList.size} ${awayBadgeNextEventList.size}")
 
-                if (homeBadgeLastEventList.size == lastMatchList.size && awayBadgeLastEventList.size == lastMatchList.size) {
+                if (!homeBadgeLastEventList.contains(null) && !awayBadgeLastEventList.contains(null)) {
                     view.showLastMatch(lastMatchList, homeBadgeLastEventList.toList(), awayBadgeLastEventList.toList())
                     view.hideLoading()
                 }
